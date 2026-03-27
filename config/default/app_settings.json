@@ -283,6 +283,7 @@
     "can_view_old_navigation": [],
     "can_default_facility_filter": [],
     "can_have_multiple_places": [],
+    "can_hide_target_count_past_goal": [],
     "can_skip_password_change": [],
     "can_get_task_notifications": [
       "chw",
