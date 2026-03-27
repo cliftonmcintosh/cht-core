@@ -307,6 +307,7 @@ describe('AnalyticsTargetsComponent', () => {
     tick(50);
     fixture.detectChanges();
 
+    expect(authService.has.calledOnceWithExactly('can_hide_target_count_past_goal')).to.be.true;
     expect(fixture.nativeElement.querySelector('.count .number')).to.be.null;
   }));
 
