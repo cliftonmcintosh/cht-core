@@ -295,7 +295,7 @@ describe('AnalyticsTargetsComponent', () => {
     expect(globalActions.setShowContent.calledOnceWithExactly(true)).to.be.true;
   });
 
-  it('should hide count number when permission is granted and goal is met', fakeAsync(() => {
+  it('should hide count number when permission is granted and goal is exceeded', fakeAsync(() => {
     sinon.reset();
     authService.has.resolves(true);
     rulesEngineService.isEnabled.resolves(true);
@@ -308,6 +308,51 @@ describe('AnalyticsTargetsComponent', () => {
     fixture.detectChanges();
 
     expect(fixture.nativeElement.querySelector('.count .number')).to.be.null;
+  }));
+
+  it('should hide count number when permission is granted and count equals goal', fakeAsync(() => {
+    sinon.reset();
+    authService.has.resolves(true);
+    rulesEngineService.isEnabled.resolves(true);
+    rulesEngineService.fetchTargets.resolves([
+      { id: 'target1', type: 'count', goal: 10, value: { pass: 10, total: 10 } },
+    ]);
+
+    component.ngOnInit();
+    tick(50);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.count .number')).to.be.null;
+  }));
+
+  it('should show count number when permission is granted but goal is not yet met', fakeAsync(() => {
+    sinon.reset();
+    authService.has.resolves(true);
+    rulesEngineService.isEnabled.resolves(true);
+    rulesEngineService.fetchTargets.resolves([
+      { id: 'target1', type: 'count', goal: 10, value: { pass: 5, total: 5 } },
+    ]);
+
+    component.ngOnInit();
+    tick(50);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.count .number')).to.not.be.null;
+  }));
+
+  it('should show count number when goal is met but permission is not granted', fakeAsync(() => {
+    sinon.reset();
+    authService.has.resolves(false);
+    rulesEngineService.isEnabled.resolves(true);
+    rulesEngineService.fetchTargets.resolves([
+      { id: 'target1', type: 'count', goal: 10, value: { pass: 15, total: 15 } },
+    ]);
+
+    component.ngOnInit();
+    tick(50);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.count .number')).to.not.be.null;
   }));
 
   it(`should reset to the default reporting period when showContent is set to false`, fakeAsync(() => {
