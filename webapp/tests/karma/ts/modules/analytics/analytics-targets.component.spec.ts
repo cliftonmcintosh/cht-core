@@ -341,6 +341,21 @@ describe('AnalyticsTargetsComponent', () => {
     expect(fixture.nativeElement.querySelector('.count .number')).to.not.be.null;
   }));
 
+  it('should show count number when permission is granted but target has no goal', fakeAsync(() => {
+    sinon.reset();
+    authService.has.resolves(true);
+    rulesEngineService.isEnabled.resolves(true);
+    rulesEngineService.fetchTargets.resolves([
+      { id: 'target1', type: 'count', goal: -1, value: { pass: 15, total: 15 } },
+    ]);
+
+    component.ngOnInit();
+    tick(50);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.count .number')).to.not.be.null;
+  }));
+
   it('should show count number when goal is met but permission is not granted', fakeAsync(() => {
     sinon.reset();
     authService.has.resolves(false);
