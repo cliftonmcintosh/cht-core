@@ -66,11 +66,9 @@ export class AnalyticsTargetsComponent implements OnInit, OnDestroy {
     this.PREVIOUS_TARGETS_TITLE = translateService.instant('targets.last_month.subtitle');
   }
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
     this.subscribeToStore();
-    this.authService.has(HIDE_COUNT_PAST_GOAL_PERMISSION).then(has => {
-      this.hideCountWhenGoalMet = has;
-    });
+    this.hideCountWhenGoalMet = await this.authService.has(HIDE_COUNT_PAST_GOAL_PERMISSION);
     this.getTargets(AnalyticsSidebarFilterComponent.DEFAULT_REPORTING_PERIOD);
   }
 
