@@ -4,7 +4,6 @@ import { combineLatest, Subscription } from 'rxjs';
 
 import { RulesEngineService } from '@mm-services/rules-engine.service';
 import { PerformanceService } from '@mm-services/performance.service';
-import { AuthService } from '@mm-services/auth.service';
 import { GlobalActions } from '@mm-actions/global';
 import { NgClass, NgFor, NgIf } from '@angular/common';
 import { ErrorLogComponent } from '@mm-components/error-log/error-log.component';
@@ -21,8 +20,6 @@ import { TranslateFromPipe } from '@mm-pipes/translate-from.pipe';
 import { LocalizeNumberPipe } from '@mm-pipes/number.pipe';
 import { Selectors } from '@mm-selectors/index';
 import { TranslateService } from '@mm-services/translate.service';
-
-const HIDE_COUNT_PAST_GOAL_PERMISSION = 'can_hide_target_count_past_goal';
 
 @Component({
   templateUrl: './analytics-targets.component.html',
@@ -45,7 +42,6 @@ export class AnalyticsTargetsComponent implements OnInit, OnDestroy {
   subscriptions: Subscription = new Subscription();
   targets: any[] = [];
   loading = true;
-  hideCountWhenGoalMet = false;
   targetsDisabled = false;
   errorStack;
   trackPerformance;
@@ -57,7 +53,6 @@ export class AnalyticsTargetsComponent implements OnInit, OnDestroy {
   constructor(
     private readonly rulesEngineService: RulesEngineService,
     private readonly performanceService: PerformanceService,
-    private readonly authService: AuthService,
     translateService: TranslateService,
     private readonly store: Store
   ) {
@@ -66,9 +61,8 @@ export class AnalyticsTargetsComponent implements OnInit, OnDestroy {
     this.PREVIOUS_TARGETS_TITLE = translateService.instant('targets.last_month.subtitle');
   }
 
-  async ngOnInit(): Promise<void> {
+  ngOnInit(): void {
     this.subscribeToStore();
-    this.hideCountWhenGoalMet = await this.authService.has(HIDE_COUNT_PAST_GOAL_PERMISSION);
     this.getTargets(AnalyticsSidebarFilterComponent.DEFAULT_REPORTING_PERIOD);
   }
 

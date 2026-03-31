@@ -18,8 +18,6 @@ import { UserSettingsService } from '@mm-services/user-settings.service';
 import { ContactTypesService } from '@mm-services/contact-types.service';
 import { SettingsService } from '@mm-services/settings.service';
 import { TelemetryService } from '@mm-services/telemetry.service';
-import { AuthService } from '@mm-services/auth.service';
-import { ResourceIconsService } from '@mm-services/resource-icons.service';
 import { Selectors } from '@mm-selectors/index';
 
 describe('AnalyticsTargetsComponent', () => {
@@ -30,8 +28,6 @@ describe('AnalyticsTargetsComponent', () => {
   let stopPerformanceTrackStub;
   let sessionService;
   let userSettingsService;
-  let authService;
-  let resourceIconsService;
   let globalActions;
   let store: MockStore;
 
@@ -89,14 +85,6 @@ describe('AnalyticsTargetsComponent', () => {
       userCtx: sinon.stub()
     };
 
-    authService = {
-      has: sinon.stub().resolves(false),
-    };
-
-    resourceIconsService = {
-      getImg: sinon.stub().returns(''),
-    };
-
     return TestBed
       .configureTestingModule({
         imports: [
@@ -110,8 +98,6 @@ describe('AnalyticsTargetsComponent', () => {
           { provide: RulesEngineService, useValue: rulesEngineService },
           { provide: PerformanceService, useValue: performanceService },
           { provide: SessionService, useValue: sessionService },
-          { provide: AuthService, useValue: authService },
-          { provide: ResourceIconsService, useValue: resourceIconsService },
           { provide: UserSettingsService, useValue: userSettingsService },
           { provide: ContactTypesService, useValue: contactTypesService },
           { provide: SettingsService, useValue: settingsService },
@@ -149,7 +135,6 @@ describe('AnalyticsTargetsComponent', () => {
 
   it('should set up component when rules engine is not enabled', fakeAsync(() => {
     sinon.reset();
-    authService.has.resolves(false);
     rulesEngineService.isEnabled.resolves(false);
 
     component.ngOnInit();
@@ -169,7 +154,6 @@ describe('AnalyticsTargetsComponent', () => {
 
   it('should fetch targets when rules engine is enabled', fakeAsync(() => {
     sinon.reset();
-    authService.has.resolves(false);
     rulesEngineService.isEnabled.resolves(true);
     rulesEngineService.fetchTargets.resolves([{ id: 'target1' }, { id: 'target2' }]);
 
@@ -193,7 +177,6 @@ describe('AnalyticsTargetsComponent', () => {
 
   it('should filter targets to visible ones', fakeAsync(() => {
     sinon.reset();
-    authService.has.resolves(false);
     rulesEngineService.isEnabled.resolves(true);
     const targets = [
       { id: 'target1' },
@@ -221,7 +204,6 @@ describe('AnalyticsTargetsComponent', () => {
 
   it('should catch rules engine errors', fakeAsync(() => {
     sinon.reset();
-    authService.has.resolves(false);
     rulesEngineService.isEnabled.rejects('error');
     const consoleErrorMock = sinon.stub(console, 'error');
 
@@ -294,82 +276,6 @@ describe('AnalyticsTargetsComponent', () => {
     expect(globalActions.setTitle.calledOnceWithExactly('targets.last_month.subtitle')).to.be.true;
     expect(globalActions.setShowContent.calledOnceWithExactly(true)).to.be.true;
   });
-
-  it('should hide count number when permission is granted and goal is exceeded', fakeAsync(() => {
-    sinon.reset();
-    authService.has.resolves(true);
-    rulesEngineService.isEnabled.resolves(true);
-    rulesEngineService.fetchTargets.resolves([
-      { id: 'target1', type: 'count', goal: 10, value: { pass: 15, total: 15 } },
-    ]);
-
-    component.ngOnInit();
-    tick(50);
-    fixture.detectChanges();
-
-    expect(authService.has.calledOnceWithExactly('can_hide_target_count_past_goal')).to.be.true;
-    expect(fixture.nativeElement.querySelector('.count .number')).to.be.null;
-  }));
-
-  it('should hide count number when permission is granted and count equals goal', fakeAsync(() => {
-    sinon.reset();
-    authService.has.resolves(true);
-    rulesEngineService.isEnabled.resolves(true);
-    rulesEngineService.fetchTargets.resolves([
-      { id: 'target1', type: 'count', goal: 10, value: { pass: 10, total: 10 } },
-    ]);
-
-    component.ngOnInit();
-    tick(50);
-    fixture.detectChanges();
-
-    expect(fixture.nativeElement.querySelector('.count .number')).to.be.null;
-  }));
-
-  it('should show count number when permission is granted but goal is not yet met', fakeAsync(() => {
-    sinon.reset();
-    authService.has.resolves(true);
-    rulesEngineService.isEnabled.resolves(true);
-    rulesEngineService.fetchTargets.resolves([
-      { id: 'target1', type: 'count', goal: 10, value: { pass: 5, total: 5 } },
-    ]);
-
-    component.ngOnInit();
-    tick(50);
-    fixture.detectChanges();
-
-    expect(fixture.nativeElement.querySelector('.count .number')).to.not.be.null;
-  }));
-
-  it('should show count number when permission is granted but target has no goal', fakeAsync(() => {
-    sinon.reset();
-    authService.has.resolves(true);
-    rulesEngineService.isEnabled.resolves(true);
-    rulesEngineService.fetchTargets.resolves([
-      { id: 'target1', type: 'count', goal: -1, value: { pass: 15, total: 15 } },
-    ]);
-
-    component.ngOnInit();
-    tick(50);
-    fixture.detectChanges();
-
-    expect(fixture.nativeElement.querySelector('.count .number')).to.not.be.null;
-  }));
-
-  it('should show count number when goal is met but permission is not granted', fakeAsync(() => {
-    sinon.reset();
-    authService.has.resolves(false);
-    rulesEngineService.isEnabled.resolves(true);
-    rulesEngineService.fetchTargets.resolves([
-      { id: 'target1', type: 'count', goal: 10, value: { pass: 15, total: 15 } },
-    ]);
-
-    component.ngOnInit();
-    tick(50);
-    fixture.detectChanges();
-
-    expect(fixture.nativeElement.querySelector('.count .number')).to.not.be.null;
-  }));
 
   it(`should reset to the default reporting period when showContent is set to false`, fakeAsync(() => {
     sinon.reset();
